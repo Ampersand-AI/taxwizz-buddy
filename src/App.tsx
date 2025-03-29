@@ -10,6 +10,7 @@ import Individual from "./pages/Individual";
 import IndividualResults from "./pages/IndividualResults";
 import Firm from "./pages/Firm";
 import FirmClientDetail from "./pages/FirmClientDetail";
+import Integrations from "./pages/Integrations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => {
               <Route path="/individual/results" element={<IndividualResults />} />
               <Route path="/firm" element={<Firm />} />
               <Route path="/firm/client/:id" element={<FirmClientDetail />} />
+              <Route path="/integrations" element={<Integrations />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>

@@ -1,3 +1,4 @@
+
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { ArrowLeft, Download, Upload, Send, CheckCircle, FileText, Loader2 } from "lucide-react";
@@ -797,4 +798,173 @@ const FirmClientDetail = () => {
                   <h3 className="font-medium text-blue-800 mb-2">
                     {client.region} Tax Filing Requirements
                   </h3>
-                  <p className="text-blue-700 text-
+                  <p className="text-blue-700 text-sm">
+                    The following documents are typically required for tax filing in this region.
+                    Required documents are marked with an asterisk (*).
+                  </p>
+                </div>
+                
+                <div className="rounded-md border overflow-hidden">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Document Name
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Required
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {requiredDocuments.map((doc, index) => {
+                        const clientDoc = client.documents.find(
+                          (d) => d.id === doc.id
+                        );
+                        return (
+                          <tr key={index}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">
+                                {doc.name}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500">
+                                {doc.required ? (
+                                  <span className="text-red-500">Yes *</span>
+                                ) : (
+                                  "No"
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {clientDoc?.uploaded ? (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  <CheckCircle className="mr-1 h-3 w-3" />
+                                  Received
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                  Pending
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+        
+        {/* Email Request Dialog */}
+        <Dialog open={isEmailOpen} onOpenChange={setIsEmailOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Request Documents</DialogTitle>
+              <DialogDescription>
+                Send an email to request missing documents from {client.name}.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label
+                  htmlFor="emailSubject"
+                  className="text-right text-sm font-medium"
+                >
+                  Subject
+                </label>
+                <Input
+                  id="emailSubject"
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-start gap-4">
+                <label
+                  htmlFor="emailBody"
+                  className="text-right text-sm font-medium pt-2"
+                >
+                  Message
+                </label>
+                <textarea
+                  id="emailBody"
+                  value={emailBody}
+                  onChange={(e) => setEmailBody(e.target.value)}
+                  className="col-span-3 flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEmailOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSendEmail}>Send Email</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Tax Draft Preview Dialog */}
+        <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+          <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Tax Draft Preview</DialogTitle>
+              <DialogDescription>
+                AI-generated tax filing draft for {client.name}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="mt-4 space-y-4">
+              {client.taxDraft ? (
+                <>
+                  <div className="bg-blue-50 p-4 rounded-md border border-blue-100">
+                    <h3 className="text-sm font-medium text-blue-800 mb-1">Summary</h3>
+                    <p className="text-sm text-blue-900">{client.taxDraft.summary}</p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium">Full Report</h3>
+                    <div className="bg-gray-50 p-4 rounded-md border text-sm whitespace-pre-line leading-relaxed">
+                      {client.taxDraft.fullReport || "No detailed report available."}
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 text-sm text-gray-500">
+                    <p>Generated on {client.taxDraft.date}</p>
+                    <p>Status: {client.taxDraft.status}</p>
+                  </div>
+                </>
+              ) : (
+                <p className="text-center py-8 text-gray-500">
+                  No tax draft available for this client yet.
+                </p>
+              )}
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsPreviewOpen(false)}>
+                Close
+              </Button>
+              <Button disabled={!client.taxDraft}>
+                <Download className="mr-2 h-4 w-4" />
+                Download PDF
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
+};
+
+export default FirmClientDetail;

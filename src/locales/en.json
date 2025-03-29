@@ -33,29 +33,7 @@
     "uploadDocuments": "Upload Supporting Documents",
     "uploadDesc": "Drag and drop your W-2, 1099, receipts, or other tax documents here, or click to browse",
     "uploadFiles": "Upload Files",
-    "generateDraft": "Generate Tax Draft",
-    "infoNote": "For a more accurate tax draft, you'll be able to upload supporting documents in the next step.",
-    "optionalNote": "While documents are optional, they help our AI provide more accurate tax optimization suggestions."
-  },
-  "results": {
-    "title": "Tax Draft Results",
-    "subtitle": "AI-generated tax filing recommendations",
-    "successTitle": "Tax Draft Generated Successfully",
-    "successDescription": "Our AI has analyzed your information and prepared a tax filing draft with optimization suggestions based on current tax laws for your region.",
-    "summary": "Summary",
-    "detailed": "Detailed Report",
-    "optimizations": "Tax Optimizations",
-    "summaryTitle": "Tax Filing Summary",
-    "summaryDescription": "Overview of your current tax situation",
-    "totalIncome": "Total Income",
-    "estimatedTax": "Estimated Tax Due",
-    "potentialDeductions": "Potential Deductions",
-    "potentialSavings": "Potential Tax Savings",
-    "summaryAnalysis": "Summary Analysis",
-    "analysisDescription": "Based on the information provided, you're in the 22% tax bracket for federal taxes. We've identified several potential deductions that could reduce your tax liability.",
-    "downloadSummary": "Download Summary Report",
-    "downloadSuccess": "Tax Report Downloaded",
-    "downloadDescription": "Your tax report has been downloaded successfully."
+    "generateDraft": "Generate Tax Draft"
   },
   "integrations": {
     "title": "Accounting Software Integrations",

@@ -22,7 +22,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import TaxWizzLogo from "@/components/TaxWizzLogo";
-import { useTranslation } from "react-i18next";
 
 const regions = [
   // United States
@@ -68,7 +67,6 @@ const regions = [
 const Individual = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("personal");
   const [formData, setFormData] = useState({
     fullName: "",
@@ -139,10 +137,10 @@ const Individual = () => {
             <TaxWizzLogo className="w-10 h-10 mr-3" />
             <div>
               <h1 className="text-2xl font-bold text-blue-900">
-                {t('individual.title')}
+                Individual Tax Filing
               </h1>
               <p className="text-blue-600">
-                {t('individual.subtitle')}
+                Prepare your tax filing with AI assistance
               </p>
             </div>
           </div>
@@ -150,9 +148,9 @@ const Individual = () => {
 
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>{t('individual.taxInfo')}</CardTitle>
+            <CardTitle>Your Tax Information</CardTitle>
             <CardDescription>
-              {t('individual.taxInfoDesc')}
+              Fill in your details to get a personalized tax filing draft.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -162,18 +160,18 @@ const Individual = () => {
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-3 mb-8">
-                <TabsTrigger value="personal">{t('individual.personal')}</TabsTrigger>
+                <TabsTrigger value="personal">Personal Info</TabsTrigger>
                 <TabsTrigger
                   value="income"
                   disabled={!validatePersonalInfo()}
                 >
-                  {t('individual.income')}
+                  Income & Expenses
                 </TabsTrigger>
                 <TabsTrigger
                   value="documents"
                   disabled={!validateIncomeInfo() || !validatePersonalInfo()}
                 >
-                  {t('individual.documents')}
+                  Documents
                 </TabsTrigger>
               </TabsList>
 
@@ -185,11 +183,11 @@ const Individual = () => {
                         htmlFor="fullName"
                         className="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        {t('individual.fullName')}
+                        Full Name
                       </label>
                       <Input
                         id="fullName"
-                        placeholder={t('individual.fullNamePlaceholder')}
+                        placeholder="Enter your full name"
                         value={formData.fullName}
                         onChange={(e) => handleInputChange(e, "fullName")}
                       />
@@ -200,12 +198,12 @@ const Individual = () => {
                         htmlFor="email"
                         className="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        {t('individual.email')}
+                        Email Address
                       </label>
                       <Input
                         id="email"
                         type="email"
-                        placeholder={t('individual.emailPlaceholder')}
+                        placeholder="Enter your email"
                         value={formData.email}
                         onChange={(e) => handleInputChange(e, "email")}
                       />
@@ -216,11 +214,11 @@ const Individual = () => {
                         htmlFor="phone"
                         className="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        {t('individual.phone')}
+                        Phone Number (optional)
                       </label>
                       <Input
                         id="phone"
-                        placeholder={t('individual.phonePlaceholder')}
+                        placeholder="Enter your phone number"
                         value={formData.phone}
                         onChange={(e) => handleInputChange(e, "phone")}
                       />
@@ -231,7 +229,7 @@ const Individual = () => {
                         htmlFor="region"
                         className="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        {t('individual.region')}
+                        Tax Region
                       </label>
                       <Select
                         value={formData.region}
@@ -240,7 +238,7 @@ const Individual = () => {
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder={t('individual.regionPlaceholder')} />
+                          <SelectValue placeholder="Select your tax region" />
                         </SelectTrigger>
                         <SelectContent>
                           {regions.map((region) => (
@@ -262,7 +260,7 @@ const Individual = () => {
                       onClick={() => setActiveTab("income")}
                       disabled={!validatePersonalInfo()}
                     >
-                      {t('common.next')}
+                      Next
                     </Button>
                   </div>
                 </form>
@@ -276,7 +274,7 @@ const Individual = () => {
                         htmlFor="incomeType"
                         className="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        {t('individual.incomeType')}
+                        Primary Income Type
                       </label>
                       <Select
                         value={formData.incomeType}
@@ -285,7 +283,7 @@ const Individual = () => {
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder={t('individual.incomeTypePlaceholder')} />
+                          <SelectValue placeholder="Select income type" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="employment">
@@ -312,11 +310,11 @@ const Individual = () => {
                         htmlFor="annualIncome"
                         className="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        {t('individual.annualIncome')}
+                        Approximate Annual Income
                       </label>
                       <Input
                         id="annualIncome"
-                        placeholder={t('individual.annualIncomePlaceholder')}
+                        placeholder="Enter amount in USD"
                         value={formData.annualIncome}
                         onChange={(e) => handleInputChange(e, "annualIncome")}
                       />
@@ -326,7 +324,8 @@ const Individual = () => {
                       <div className="flex">
                         <AlertCircle className="h-5 w-5 text-blue-600 mr-2 flex-shrink-0" />
                         <p className="text-sm text-blue-700">
-                          {t('individual.infoNote')}
+                          For a more accurate tax draft, you'll be able to upload
+                          supporting documents in the next step.
                         </p>
                       </div>
                     </div>
@@ -338,14 +337,14 @@ const Individual = () => {
                       variant="outline"
                       onClick={() => setActiveTab("personal")}
                     >
-                      {t('common.back')}
+                      Back
                     </Button>
                     <Button
                       type="button"
                       onClick={() => setActiveTab("documents")}
                       disabled={!validateIncomeInfo()}
                     >
-                      {t('common.next')}
+                      Next
                     </Button>
                   </div>
                 </form>
@@ -357,10 +356,11 @@ const Individual = () => {
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                       <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-gray-900 mb-1">
-                        {t('individual.uploadDocuments')}
+                        Upload Supporting Documents
                       </h3>
                       <p className="text-sm text-gray-500 mb-4">
-                        {t('individual.uploadDesc')}
+                        Drag and drop your W-2, 1099, receipts, or other tax
+                        documents here, or click to browse
                       </p>
                       <Input
                         id="file-upload"
@@ -378,7 +378,7 @@ const Individual = () => {
                             ?.click();
                         }}
                       >
-                        {t('individual.uploadFiles')}
+                        Upload Files
                       </Button>
                     </div>
 
@@ -386,7 +386,8 @@ const Individual = () => {
                       <div className="flex">
                         <AlertCircle className="h-5 w-5 text-yellow-600 mr-2 flex-shrink-0" />
                         <p className="text-sm text-yellow-700">
-                          {t('individual.optionalNote')}
+                          While documents are optional, they help our AI provide
+                          more accurate tax optimization suggestions.
                         </p>
                       </div>
                     </div>
@@ -398,10 +399,10 @@ const Individual = () => {
                       variant="outline"
                       onClick={() => setActiveTab("income")}
                     >
-                      {t('common.back')}
+                      Back
                     </Button>
                     <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                      {t('individual.generateDraft')}
+                      Generate Tax Draft
                     </Button>
                   </div>
                 </form>

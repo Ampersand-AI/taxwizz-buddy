@@ -1,4 +1,3 @@
-
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { ArrowLeft, Download, Upload, Send, CheckCircle, FileText, Loader2 } from "lucide-react";
@@ -24,6 +23,14 @@ import {
 import TaxWizzLogo from "@/components/TaxWizzLogo";
 import { generateTaxSuggestions } from "@/lib/ai-utils";
 import { useTranslation } from "react-i18next";
+
+// Define tax draft type to include fullReport property
+interface TaxDraft {
+  summary: string;
+  date: string;
+  status: string;
+  fullReport?: string;  // Added the missing property
+}
 
 // Region-specific document requirements
 const documentRequirements = {
@@ -89,7 +96,27 @@ const documentRequirements = {
 };
 
 // Sample client data with enhanced region support
-const clientsData = [
+interface Document {
+  id: string;
+  name: string;
+  uploaded: boolean;
+  date: string;
+}
+
+interface Client {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  status: string;
+  taxType: string;
+  region: string;
+  notes: string;
+  documents: Document[];
+  taxDraft: TaxDraft | null;
+}
+
+const clientsData: Client[] = [
   {
     id: 1,
     name: "John Smith",
@@ -142,6 +169,7 @@ const clientsData = [
       summary: "S-Corporation filing shows $1.2M revenue with $280K taxable income. Estimated tax liability is $58,800 federal. Potential tax savings through R&D credits and depreciation optimization.",
       date: "Feb 10, 2023",
       status: "Ready for Review",
+      fullReport: undefined
     },
   },
   {
@@ -163,6 +191,7 @@ const clientsData = [
       summary: "Individual filing with $85K W-2 income and $12K capital gains. Standard deduction recommended. Estimated federal tax due: $14,280.",
       date: "Feb 20, 2023",
       status: "Approved",
+      fullReport: undefined
     },
   },
   {
@@ -768,184 +797,4 @@ const FirmClientDetail = () => {
                   <h3 className="font-medium text-blue-800 mb-2">
                     {client.region} Tax Filing Requirements
                   </h3>
-                  <p className="text-blue-700 text-sm mb-3">
-                    The following documents are specific to {client.region} tax regulations. Required documents must be submitted for tax filing.
-                  </p>
-                  
-                  <div className="rounded-md border bg-white overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Document Name
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Required
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {requiredDocuments.map((doc, index) => {
-                          const clientDoc = allDocuments.find(d => d.id === doc.id);
-                          const isUploaded = clientDoc?.uploaded || false;
-                          
-                          return (
-                            <tr key={index}>
-                              <td className="px-6 py-4">
-                                <div className="text-sm font-medium text-gray-900">
-                                  {doc.name}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                {doc.required ? (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                    Required
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                    Optional
-                                  </span>
-                                )}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                {isUploaded ? (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <CheckCircle className="mr-1 h-3 w-3" />
-                                    Received
-                                  </span>
-                                ) : doc.required ? (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                    Missing
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                    Not Submitted
-                                  </span>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                        
-                        {requiredDocuments.length === 0 && (
-                          <tr>
-                            <td colSpan={3} className="px-6 py-8 text-center text-sm text-gray-500">
-                              No specific requirements defined for {client.region}.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Dialog open={isEmailOpen} onOpenChange={setIsEmailOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Send Document Request</DialogTitle>
-            <DialogDescription>
-              Customize the email to request documents from this client.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div>
-              <label
-                htmlFor="emailSubject"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Email Subject
-              </label>
-              <Input
-                id="emailSubject"
-                value={emailSubject}
-                onChange={(e) => setEmailSubject(e.target.value)}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="emailBody"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Email Body
-              </label>
-              <textarea
-                id="emailBody"
-                rows={8}
-                className="w-full rounded-md border border-gray-300 p-3"
-                value={emailBody}
-                onChange={(e) => setEmailBody(e.target.value)}
-              ></textarea>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEmailOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSendEmail}>
-              <Send className="mr-2 h-4 w-4" />
-              Send Request
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>AI-Generated Tax Draft</DialogTitle>
-            <DialogDescription>
-              Generated for {client.name} ({client.region}) on {client.taxDraft?.date}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-6 py-4">
-            {client.taxDraft ? (
-              <>
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h3 className="font-medium text-blue-800 mb-2">Summary</h3>
-                  <p className="text-blue-700">{client.taxDraft.summary}</p>
-                </div>
-                
-                <div className="space-y-4">
-                  <h3 className="font-medium text-lg">Detailed Report</h3>
-                  <div className="p-4 bg-white rounded-lg border border-gray-200 whitespace-pre-line">
-                    {client.taxDraft.fullReport || "Detailed report not available."}
-                  </div>
-                </div>
-                
-                <div className="pt-4 border-t mt-4">
-                  <p className="text-sm text-gray-500 italic mb-4">
-                    This tax draft is AI-generated based on the information provided. 
-                    It should be reviewed by a qualified tax professional before filing.
-                  </p>
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No tax draft available for this client yet.</p>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPreviewOpen(false)}>
-              Close
-            </Button>
-            <Button disabled={!client.taxDraft}>
-              <Download className="mr-2 h-4 w-4" />
-              Download Report
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
-
-export default FirmClientDetail;
+                  <p className="text-blue-700 text-

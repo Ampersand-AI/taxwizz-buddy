@@ -1,7 +1,6 @@
-
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
-import { ArrowLeft, Download, Upload, Send, CheckCircle, FileText, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, Upload, Send, CheckCircle, FileText, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,7 +21,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import TaxWizzLogo from "@/components/TaxWizzLogo";
-import { generateTaxSuggestions } from "@/lib/ai-utils";
+import { generateTaxSuggestions, generateTaxReportSummary } from "@/lib/ai-utils";
+import { formatCurrency, taxRatesByRegion } from "@/lib/region-tax-utils";
 import { useTranslation } from "react-i18next";
 
 // Define tax draft type to include fullReport property
@@ -30,7 +30,9 @@ interface TaxDraft {
   summary: string;
   date: string;
   status: string;
-  fullReport?: string;  // Added the missing property
+  fullReport?: string;
+  regionSpecificInsights?: string;
+  estimatedLiability?: string;
 }
 
 // Region-specific document requirements
@@ -115,6 +117,7 @@ interface Client {
   notes: string;
   documents: Document[];
   taxDraft: TaxDraft | null;
+  annualIncome?: string; // Added optional annual income field
 }
 
 const clientsData: Client[] = [
@@ -133,6 +136,7 @@ const clientsData: Client[] = [
       { id: "1099", name: "1099-INT Forms", uploaded: false, date: "" },
     ],
     taxDraft: null,
+    annualIncome: "85000",
   },
   {
     id: 2,
@@ -150,6 +154,7 @@ const clientsData: Client[] = [
       { id: "charity", name: "Charitable Donations", uploaded: false, date: "" },
     ],
     taxDraft: null,
+    annualIncome: "92000",
   },
   {
     id: 3,
@@ -172,6 +177,7 @@ const clientsData: Client[] = [
       status: "Ready for Review",
       fullReport: undefined
     },
+    annualIncome: "1200000",
   },
   {
     id: 4,
@@ -194,6 +200,7 @@ const clientsData: Client[] = [
       status: "Approved",
       fullReport: undefined
     },
+    annualIncome: "97000",
   },
   {
     id: 5,
@@ -210,6 +217,7 @@ const clientsData: Client[] = [
       { id: "financials", name: "Consolidated Financial Statements", uploaded: false, date: "" },
     ],
     taxDraft: null,
+    annualIncome: "2500000",
   },
   {
     id: 6,
@@ -226,6 +234,7 @@ const clientsData: Client[] = [
       { id: "investment", name: "Investment Proofs", uploaded: false, date: "" },
     ],
     taxDraft: null,
+    annualIncome: "750000",
   },
   {
     id: 7,
@@ -242,6 +251,7 @@ const clientsData: Client[] = [
       { id: "bank", name: "Bank Statements", uploaded: true, date: "May 12, 2023" },
     ],
     taxDraft: null,
+    annualIncome: "60000",
   },
 ];
 
@@ -253,6 +263,8 @@ const FirmClientDetail = () => {
   const [isEmailOpen, setIsEmailOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isIncomeDialogOpen, setIsIncomeDialogOpen] = useState(false);
+  const [tempIncome, setTempIncome] = useState("");
   const [emailSubject, setEmailSubject] = useState("Document Request for Tax Filing");
   const [emailBody, setEmailBody] = useState(
     "Dear Client,\n\nWe are preparing your tax filing and need the following documents:\n- W-2 Forms\n- 1099 Forms (if applicable)\n- Receipts for deductible expenses\n\nPlease upload these to your client portal or reply to this email with attachments.\n\nThank you,\nYour Tax Professional"
@@ -387,20 +399,58 @@ const FirmClientDetail = () => {
   };
 
   const handleGenerateDraft = async () => {
+    // If the client doesn't have income info yet, prompt for it
+    if (!client.annualIncome) {
+      setIsIncomeDialogOpen(true);
+      return;
+    }
+    
+    await generateDraft();
+  };
+  
+  const generateDraft = async () => {
     setIsGenerating(true);
     
     try {
+      // Update client with income if entered
+      if (tempIncome) {
+        const updatedClients = clientData.map(c => 
+          c.id === clientId ? { ...c, annualIncome: tempIncome } : c
+        );
+        setClientData(updatedClients);
+      }
+      
+      // Get updated client data
+      const currentClient = clientData.find(c => c.id === clientId);
+      if (!currentClient) return;
+      
       // Prepare data for AI processing
       const taxData = {
-        clientName: client.name,
-        taxType: client.taxType,
-        region: client.region,
-        documents: client.documents.filter(doc => doc.uploaded).map(doc => doc.name),
-        // Add any other relevant data here
+        clientName: currentClient.name,
+        taxType: currentClient.taxType,
+        region: currentClient.region,
+        annualIncome: tempIncome || currentClient.annualIncome,
+        documents: currentClient.documents.filter(doc => doc.uploaded).map(doc => doc.name),
       };
       
       // Generate tax suggestions using AI
       const suggestions = await generateTaxSuggestions(taxData);
+      
+      // Format estimated tax liability if income is available
+      let estimatedLiability = "";
+      if (taxData.annualIncome) {
+        const income = parseFloat(taxData.annualIncome);
+        if (!isNaN(income)) {
+          const regionData = taxRatesByRegion[currentClient.region];
+          if (regionData) {
+            const rate = regionData.rates[0]; // Simplified - use first bracket
+            estimatedLiability = formatCurrency(income * rate, currentClient.region);
+          }
+        }
+      }
+      
+      // Generate a summary tailored to the client's region and tax type
+      const summary = generateTaxReportSummary(currentClient, suggestions);
       
       // Update client with tax draft
       const updatedClients = clientData.map(c => {
@@ -409,14 +459,16 @@ const FirmClientDetail = () => {
             ...c,
             status: "Draft Generated",
             taxDraft: {
-              summary: suggestions.substring(0, 300), // Truncate to prevent overly long summaries
+              summary: summary.substring(0, 300), // Truncate to prevent overly long summaries
               date: new Date().toLocaleDateString('en-US', { 
                 year: 'numeric', 
                 month: 'short', 
                 day: 'numeric' 
               }),
               status: "Ready for Review",
-              fullReport: suggestions
+              fullReport: suggestions,
+              regionSpecificInsights: `Specific to ${c.region} tax regulations.`,
+              estimatedLiability: estimatedLiability
             }
           };
         }
@@ -425,10 +477,12 @@ const FirmClientDetail = () => {
       
       setClientData(updatedClients);
       setIsPreviewOpen(true);
+      setIsIncomeDialogOpen(false);
+      setTempIncome("");
       
       toast({
         title: "Draft Generated",
-        description: "AI tax draft has been generated and is ready for review.",
+        description: `AI tax draft has been generated for ${currentClient.region} and is ready for review.`,
       });
     } catch (error) {
       console.error("Error generating tax draft:", error);
@@ -451,6 +505,29 @@ const FirmClientDetail = () => {
 
   const canGenerateDraft = () => {
     return client.status !== "Documents Pending" || getMissingRequiredDocuments().length === 0;
+  };
+
+  // Create region-specific email templates
+  const getRegionSpecificEmailTemplate = () => {
+    const missingDocs = getMissingRequiredDocuments();
+    let missingDocsText = "";
+    
+    if (missingDocs.length > 0) {
+      missingDocsText = "We require the following documents to proceed with your tax filing:\n\n";
+      missingDocs.forEach(doc => {
+        missingDocsText += `- ${doc.name}\n`;
+      });
+      missingDocsText += "\n";
+    }
+    
+    return `Dear ${client.name},
+
+We are preparing your tax filing for ${client.region} and need your assistance.
+
+${missingDocsText}Please upload these to your client portal or reply to this email with attachments.
+
+Thank you,
+Your Tax Professional`;
   };
 
   return (
@@ -483,20 +560,29 @@ const FirmClientDetail = () => {
             <CheckCircle className="h-5 w-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
             <div>
               <h3 className="font-medium text-green-800 mb-1">
-                Tax Draft Generated
+                {t('firmClient.taxDraftGenerated')}
               </h3>
               <p className="text-green-700 text-sm mb-2">
                 {client.taxDraft.summary}
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white"
-                onClick={() => setIsPreviewOpen(true)}
-              >
-                <FileText className="mr-2 h-4 w-4" />
-                View Tax Draft
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-white"
+                  onClick={() => setIsPreviewOpen(true)}
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  {t('firmClient.viewTaxDraft')}
+                </Button>
+                
+                {client.taxDraft.estimatedLiability && (
+                  <div className="flex items-center text-sm text-blue-700 ml-4">
+                    <AlertCircle className="h-4 w-4 mr-1" />
+                    Estimated Tax: {client.taxDraft.estimatedLiability}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -559,6 +645,16 @@ const FirmClientDetail = () => {
                     </span>
                   </p>
                 </div>
+                {client.annualIncome && (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">
+                      Annual Income
+                    </h3>
+                    <p className="font-medium">
+                      {formatCurrency(parseFloat(client.annualIncome), client.region)}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="mt-6">
@@ -580,10 +676,13 @@ const FirmClientDetail = () => {
             <CardContent className="space-y-4">
               <Button
                 className="w-full justify-start"
-                onClick={() => setIsEmailOpen(true)}
+                onClick={() => {
+                  setEmailBody(getRegionSpecificEmailTemplate());
+                  setIsEmailOpen(true);
+                }}
               >
                 <Send className="mr-2 h-4 w-4" />
-                Request Documents
+                {t('firmClient.requestDocuments')}
               </Button>
 
               <Button
@@ -612,12 +711,12 @@ const FirmClientDetail = () => {
                     <path d="M10 9H8" />
                   </svg>
                 )}
-                {isGenerating ? "Generating..." : "Generate AI Tax Draft"}
+                {isGenerating ? t('firmClient.generatingDraft') : t('firmClient.generateAIDraft')}
               </Button>
 
               {!canGenerateDraft() && client.status === "Documents Pending" && (
                 <div className="text-xs text-amber-600 mt-1">
-                  Missing required documents for {client.region}
+                  {t('firmClient.missingRequired')} {client.region}
                 </div>
               )}
 
@@ -628,7 +727,7 @@ const FirmClientDetail = () => {
                 onClick={() => client.taxDraft && setIsPreviewOpen(true)}
               >
                 <Download className="mr-2 h-4 w-4" />
-                Download Tax Report
+                {t('firmClient.downloadPDF')}
               </Button>
 
               <div className="pt-4 border-t">
@@ -648,7 +747,7 @@ const FirmClientDetail = () => {
                   }}
                 >
                   <Upload className="mr-2 h-4 w-4" />
-                  Upload Files
+                  {t('individual.uploadFiles')}
                 </Button>
               </div>
             </CardContent>
@@ -665,9 +764,9 @@ const FirmClientDetail = () => {
           <CardContent>
             <Tabs defaultValue="required">
               <TabsList className="mb-4">
-                <TabsTrigger value="required">Required Documents</TabsTrigger>
-                <TabsTrigger value="uploaded">Uploaded Documents</TabsTrigger>
-                <TabsTrigger value="region">Region-Specific Requirements</TabsTrigger>
+                <TabsTrigger value="required">{t('firmClient.requiredDocuments')}</TabsTrigger>
+                <TabsTrigger value="uploaded">{t('firmClient.uploadedDocuments')}</TabsTrigger>
+                <TabsTrigger value="region">{t('firmClient.regionRequirements')}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="required">
@@ -690,281 +789,4 @@ const FirmClientDetail = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {allDocuments.map((doc, index) => (
-                        <tr key={index}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
-                              {doc.name}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {doc.uploaded ? (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <CheckCircle className="mr-1 h-3 w-3" />
-                                Received
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                Pending
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {doc.date || "—"}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            {doc.uploaded ? (
-                              <Button variant="link" size="sm">
-                                View
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="link"
-                                size="sm"
-                                onClick={() => setIsEmailOpen(true)}
-                              >
-                                Request
-                              </Button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="uploaded">
-                <div className="rounded-md border overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Document Name
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Date Uploaded
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {allDocuments
-                        .filter((doc) => doc.uploaded)
-                        .map((doc, index) => (
-                          <tr key={index}>
-                            <td className="px-6 py-4">
-                              <div className="text-sm font-medium text-gray-900">
-                                {doc.name}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {doc.date}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                              <Button
-                                variant="link"
-                                size="sm"
-                                className="mr-2"
-                              >
-                                View
-                              </Button>
-                              <Button variant="link" size="sm">
-                                Download
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      {allDocuments.filter((doc) => doc.uploaded).length ===
-                        0 && (
-                        <tr>
-                          <td
-                            colSpan={3}
-                            className="px-6 py-8 text-center text-sm text-gray-500"
-                          >
-                            No documents have been uploaded yet.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="region">
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
-                  <h3 className="font-medium text-blue-800 mb-2">
-                    {client.region} Tax Filing Requirements
-                  </h3>
-                  <p className="text-blue-700 text-sm">
-                    The following documents are typically required for tax filing in this region.
-                    Required documents are marked with an asterisk (*).
-                  </p>
-                </div>
-                
-                <div className="rounded-md border overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Document Name
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Required
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {requiredDocuments.map((doc, index) => {
-                        const clientDoc = client.documents.find(
-                          (d) => d.id === doc.id
-                        );
-                        return (
-                          <tr key={index}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">
-                                {doc.name}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {doc.required ? (
-                                  <span className="text-red-500">Yes *</span>
-                                ) : (
-                                  "No"
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              {clientDoc?.uploaded ? (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                  <CheckCircle className="mr-1 h-3 w-3" />
-                                  Received
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                  Pending
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-        
-        {/* Email Request Dialog */}
-        <Dialog open={isEmailOpen} onOpenChange={setIsEmailOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Request Documents</DialogTitle>
-              <DialogDescription>
-                Send an email to request missing documents from {client.name}.
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label
-                  htmlFor="emailSubject"
-                  className="text-right text-sm font-medium"
-                >
-                  Subject
-                </label>
-                <Input
-                  id="emailSubject"
-                  value={emailSubject}
-                  onChange={(e) => setEmailSubject(e.target.value)}
-                  className="col-span-3"
-                />
-              </div>
-              
-              <div className="grid grid-cols-4 items-start gap-4">
-                <label
-                  htmlFor="emailBody"
-                  className="text-right text-sm font-medium pt-2"
-                >
-                  Message
-                </label>
-                <textarea
-                  id="emailBody"
-                  value={emailBody}
-                  onChange={(e) => setEmailBody(e.target.value)}
-                  className="col-span-3 flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                />
-              </div>
-            </div>
-            
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsEmailOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleSendEmail}>Send Email</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        
-        {/* Tax Draft Preview Dialog */}
-        <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-          <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Tax Draft Preview</DialogTitle>
-              <DialogDescription>
-                AI-generated tax filing draft for {client.name}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="mt-4 space-y-4">
-              {client.taxDraft ? (
-                <>
-                  <div className="bg-blue-50 p-4 rounded-md border border-blue-100">
-                    <h3 className="text-sm font-medium text-blue-800 mb-1">Summary</h3>
-                    <p className="text-sm text-blue-900">{client.taxDraft.summary}</p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium">Full Report</h3>
-                    <div className="bg-gray-50 p-4 rounded-md border text-sm whitespace-pre-line leading-relaxed">
-                      {client.taxDraft.fullReport || "No detailed report available."}
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4 text-sm text-gray-500">
-                    <p>Generated on {client.taxDraft.date}</p>
-                    <p>Status: {client.taxDraft.status}</p>
-                  </div>
-                </>
-              ) : (
-                <p className="text-center py-8 text-gray-500">
-                  No tax draft available for this client yet.
-                </p>
-              )}
-            </div>
-            
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsPreviewOpen(false)}>
-                Close
-              </Button>
-              <Button disabled={!client.taxDraft}>
-                <Download className="mr-2 h-4 w-4" />
-                Download PDF
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </div>
-  );
-};
-
-export default FirmClientDetail;
+                      {allDocuments.map((doc, index)

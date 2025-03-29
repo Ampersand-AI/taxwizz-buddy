@@ -24,13 +24,44 @@ import { useToast } from "@/components/ui/use-toast";
 import TaxWizzLogo from "@/components/TaxWizzLogo";
 
 const regions = [
+  // United States
   { value: "us-federal", label: "United States (Federal)" },
   { value: "us-california", label: "United States - California" },
   { value: "us-newyork", label: "United States - New York" },
   { value: "us-texas", label: "United States - Texas" },
+  
+  // United Kingdom
   { value: "uk", label: "United Kingdom" },
+  { value: "uk-england", label: "United Kingdom - England" },
+  { value: "uk-scotland", label: "United Kingdom - Scotland" },
+  { value: "uk-wales", label: "United Kingdom - Wales" },
+  { value: "uk-northern-ireland", label: "United Kingdom - Northern Ireland" },
+  
+  // Canada
   { value: "canada", label: "Canada" },
+  { value: "canada-ontario", label: "Canada - Ontario" },
+  { value: "canada-quebec", label: "Canada - Quebec" },
+  { value: "canada-bc", label: "Canada - British Columbia" },
+  
+  // Australia
   { value: "australia", label: "Australia" },
+  { value: "australia-nsw", label: "Australia - New South Wales" },
+  { value: "australia-victoria", label: "Australia - Victoria" },
+  { value: "australia-queensland", label: "Australia - Queensland" },
+  
+  // India
+  { value: "india", label: "India" },
+  { value: "india-maharashtra", label: "India - Maharashtra" },
+  { value: "india-delhi", label: "India - Delhi" },
+  { value: "india-karnataka", label: "India - Karnataka" },
+  
+  // Singapore
+  { value: "singapore", label: "Singapore" },
+  
+  // UAE
+  { value: "uae", label: "United Arab Emirates" },
+  { value: "uae-dubai", label: "UAE - Dubai" },
+  { value: "uae-abudhabi", label: "UAE - Abu Dhabi" },
 ];
 
 const Individual = () => {

@@ -1,3 +1,4 @@
+
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { ArrowLeft, Download, Upload, Send, CheckCircle, FileText, Loader2, AlertCircle } from "lucide-react";
@@ -789,4 +790,300 @@ Your Tax Professional`;
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {allDocuments.map((doc, index)
+                      {allDocuments.map((doc, index) => (
+                        <tr key={doc.id + "-" + index}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {doc.name}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                doc.uploaded
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                              }`}
+                            >
+                              {doc.uploaded ? "Uploaded" : "Pending"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {doc.date || "-"}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            {!doc.uploaded && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-blue-600 hover:text-blue-900"
+                                onClick={() => {
+                                  document.getElementById("file-upload")?.click();
+                                }}
+                              >
+                                Upload
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="uploaded">
+                <div className="rounded-md border overflow-hidden">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Document Name
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date Uploaded
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {client.documents
+                        .filter((doc) => doc.uploaded)
+                        .map((doc, index) => (
+                          <tr key={doc.id + "-uploaded-" + index}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">
+                                {doc.name}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {doc.date}
+                            </td>
+                          </tr>
+                        ))}
+                      {client.documents.filter((doc) => doc.uploaded).length === 0 && (
+                        <tr>
+                          <td
+                            colSpan={2}
+                            className="px-6 py-4 text-sm text-center text-gray-500"
+                          >
+                            No documents uploaded yet
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="region">
+                <div className="space-y-4">
+                  <div className="p-4 bg-blue-50 rounded-md border border-blue-200">
+                    <h3 className="font-medium text-blue-800 mb-2">
+                      {client.region} Tax Filing Requirements
+                    </h3>
+                    <ul className="list-disc pl-5 text-sm text-blue-700 space-y-1">
+                      {requiredDocuments.map((doc, index) => (
+                        <li key={index}>
+                          {doc.name}
+                          {doc.required && (
+                            <span className="text-red-600 ml-1">(Required)</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="p-4 bg-purple-50 rounded-md border border-purple-200">
+                    <h3 className="font-medium text-purple-800 mb-2">
+                      Region-Specific Notes
+                    </h3>
+                    <p className="text-sm text-purple-700">
+                      {client.region === "US - California"
+                        ? "California has additional state tax forms and specific requirements for property tax reporting."
+                        : client.region === "US - New York"
+                        ? "New York state has specific deductions for city taxes and transit expenses."
+                        : client.region === "US - Texas"
+                        ? "Texas has no state income tax, but has higher property taxes that may be deductible."
+                        : client.region === "UK - England"
+                        ? "UK tax reporting requires National Insurance contributions and PAYE documentation."
+                        : client.region === "India - Maharashtra"
+                        ? "India requires PAN details and has specific rules for TDS certificates."
+                        : client.region === "Australia - Victoria"
+                        ? "Australian tax filing follows the July-June financial year and requires TFN details."
+                        : client.region === "Singapore"
+                        ? "Singapore taxation requires CPF contribution history and has specific relief categories."
+                        : "Standard federal tax documentation required."}
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Email Request Dialog */}
+      <Dialog open={isEmailOpen} onOpenChange={setIsEmailOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Send Document Request</DialogTitle>
+            <DialogDescription>
+              Email the client to request missing tax documents.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="email" className="text-right text-sm font-medium">
+                To
+              </label>
+              <Input
+                id="email"
+                defaultValue={client.email}
+                readOnly
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="subject" className="text-right text-sm font-medium">
+                Subject
+              </label>
+              <Input
+                id="subject"
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="body" className="text-right text-sm font-medium">
+                Message
+              </label>
+              <textarea
+                id="body"
+                value={emailBody}
+                onChange={(e) => setEmailBody(e.target.value)}
+                rows={8}
+                className="col-span-3 border rounded-md p-2"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEmailOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button onClick={handleSendEmail}>
+              {t('firmClient.emailRequest')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tax Draft Preview Dialog */}
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('firmClient.taxDraftPreview')}</DialogTitle>
+            <DialogDescription>
+              AI-generated tax draft for {client.name} in {client.region}
+            </DialogDescription>
+          </DialogHeader>
+          {client.taxDraft && (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center border-b pb-2">
+                <div>
+                  <h3 className="font-medium">{client.name}</h3>
+                  <p className="text-sm text-gray-500">{client.region}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium">Date: {client.taxDraft.date}</p>
+                  <p className="text-sm text-blue-600">
+                    Status: {client.taxDraft.status}
+                  </p>
+                </div>
+              </div>
+              
+              {client.taxDraft.estimatedLiability && (
+                <div className="bg-blue-50 p-3 rounded-md">
+                  <h3 className="font-medium text-blue-800">Estimated Tax Liability</h3>
+                  <p className="text-blue-700">{client.taxDraft.estimatedLiability}</p>
+                </div>
+              )}
+              
+              <div>
+                <h3 className="font-medium">Tax Analysis</h3>
+                <div className="whitespace-pre-wrap bg-gray-50 p-3 rounded-md text-sm mt-1 max-h-[300px] overflow-y-auto">
+                  {client.taxDraft.fullReport || client.taxDraft.summary}
+                </div>
+              </div>
+              
+              {client.taxDraft.regionSpecificInsights && (
+                <div>
+                  <h3 className="font-medium">Region-Specific Insights</h3>
+                  <p className="text-sm bg-purple-50 p-3 rounded-md mt-1">
+                    {client.taxDraft.regionSpecificInsights}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPreviewOpen(false)}>
+              Close
+            </Button>
+            <Button>
+              <Download className="mr-2 h-4 w-4" />
+              {t('firmClient.downloadPDF')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Income Input Dialog */}
+      <Dialog open={isIncomeDialogOpen} onOpenChange={setIsIncomeDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Enter Annual Income</DialogTitle>
+            <DialogDescription>
+              Provide the client's annual income to generate a more accurate tax draft.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="income" className="text-right text-sm font-medium">
+                Annual Income
+              </label>
+              <Input
+                id="income"
+                type="number"
+                value={tempIncome}
+                onChange={(e) => setTempIncome(e.target.value)}
+                placeholder="Enter amount"
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsIncomeDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button 
+              onClick={generateDraft} 
+              disabled={!tempIncome || isGenerating}
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t('firmClient.generatingDraft')}
+                </>
+              ) : (
+                t('common.continue')
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default FirmClientDetail;

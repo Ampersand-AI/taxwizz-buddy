@@ -8,7 +8,8 @@
     "cancel": "取消",
     "save": "保存",
     "submit": "提交",
-    "loading": "加载中..."
+    "loading": "加载中...",
+    "continue": "继续"
   },
   "individual": {
     "title": "个人税务申报",

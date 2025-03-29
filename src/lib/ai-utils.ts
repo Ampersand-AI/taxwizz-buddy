@@ -1,11 +1,10 @@
-
 import { API_KEYS } from "@/config/api-keys";
 import { getEstimatedTaxRate, taxDeductionsByRegion, formatCurrency } from "./region-tax-utils";
 
 export async function generateTaxSuggestions(taxData: any) {
   try {
-    // Estimate tax rate based on region if income is provided
-    let estimatedTaxRate = 0.2; // Default rate
+    // Enhanced tax analysis with more detailed tax estimation
+    let estimatedTaxRate = 0.2;
     let estimatedTaxAmount = 0;
     let formattedCurrency = "";
     
@@ -17,32 +16,46 @@ export async function generateTaxSuggestions(taxData: any) {
         formattedCurrency = formatCurrency(estimatedTaxAmount, taxData.region);
       }
     }
-    
-    // Get region-specific deductions
+
+    // Get region-specific deductions and rules
     const deductions = taxDeductionsByRegion[taxData.region] || [];
     
-    // Create a more detailed prompt based on the region and tax data
+    // Enhanced AI prompt for better tax analysis
     const detailedPrompt = `
-      Generate comprehensive tax optimization suggestions for a ${taxData.taxType} taxpayer in ${taxData.region}.
+      Generate a comprehensive tax analysis report for a ${taxData.taxType} taxpayer in ${taxData.region}.
       
-      Client Details:
+      Client Profile:
       - Name: ${taxData.clientName}
       - Tax Type: ${taxData.taxType}
       - Region: ${taxData.region}
-      ${taxData.annualIncome ? `- Annual Income: ${taxData.annualIncome}` : ''}
-      
-      Documents available: ${taxData.documents?.join(', ') || 'None'}
-      
-      Based on the provided information:
-      1. Provide an estimated tax liability (${formattedCurrency} based on ${(estimatedTaxRate * 100).toFixed(1)}% estimated rate)
-      2. List specific deductions and credits available in ${taxData.region}
-      3. Suggest tax optimization strategies relevant to this region
-      4. Mention region-specific filing requirements and deadlines
-      5. Provide advice on documentation required for local tax authority
-      
-      Format the response with clear sections and bullet points for readability.
+      - Annual Income: ${taxData.annualIncome || 'Not provided'}
+      - Available Documents: ${taxData.documents?.join(', ') || 'None'}
+
+      Based on the provided information, generate:
+      1. Tax Liability Analysis:
+         - Estimated tax liability: ${formattedCurrency} (based on ${(estimatedTaxRate * 100).toFixed(1)}% rate)
+         - Breakdown by tax brackets
+         - Local tax considerations for ${taxData.region}
+
+      2. Deductions and Credits:
+         - Available deductions in ${taxData.region}
+         - Potential tax credits
+         - Optimization recommendations
+
+      3. Risk Assessment:
+         - Missing documentation analysis
+         - Compliance review for ${taxData.region}
+         - Audit risk factors
+
+      4. Tax Planning Recommendations:
+         - Short-term tax savings opportunities
+         - Long-term tax planning strategies
+         - Region-specific considerations
+
+      Format the response with clear sections and bullet points.
     `;
 
+    // Enhanced OpenAI model call
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -54,14 +67,15 @@ export async function generateTaxSuggestions(taxData: any) {
         messages: [
           {
             role: "system",
-            content: "You are a specialized tax advisor with expertise in international tax law and regional tax regulations. Provide detailed, accurate, and region-specific tax advice. Include concrete numbers, deadlines, and recommendations where possible."
+            content: `You are a specialized tax advisor with expertise in ${taxData.region} tax regulations. Provide detailed, accurate, and region-specific tax analysis.`
           },
           {
             role: "user",
             content: detailedPrompt
           }
         ],
-        max_tokens: 1500,
+        temperature: 0.2,
+        max_tokens: 2000,
       }),
     });
 
@@ -77,27 +91,33 @@ export async function generateTaxSuggestions(taxData: any) {
   }
 }
 
-// Function to generate a PDF-like summary for tax reports
+// Enhanced tax report summary generation
 export function generateTaxReportSummary(client: any, suggestions: string) {
-  let summary = '';
-  
+  const reportDate = new Date().toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+
   if (client.taxType === "Individual") {
-    summary = `Individual Tax Filing Assessment for ${client.name} (${client.region})
+    return `Tax Analysis Report - ${reportDate}
     
-    Based on the provided documents and information, we've analyzed your tax situation and generated the following insights:
-    
-    ${suggestions.substring(0, 300)}...
-    
-    Key recommendations include optimizing deductions specific to ${client.region} and ensuring compliance with local regulations.`;
+Individual Tax Filing Assessment for ${client.name}
+Region: ${client.region}
+
+Key Findings:
+${suggestions.substring(0, 500)}
+
+This analysis includes region-specific tax considerations for ${client.region}, available deductions, and optimization recommendations. For detailed insights and recommendations, please review the full report.`;
   } else {
-    summary = `Business Tax Filing Assessment for ${client.name} (${client.region})
+    return `Tax Analysis Report - ${reportDate}
     
-    Based on the financial documents provided, we've analyzed your business tax situation and generated the following insights:
-    
-    ${suggestions.substring(0, 300)}...
-    
-    Key recommendations include utilizing available business tax credits in ${client.region} and optimizing your tax structure.`;
+Business Tax Filing Assessment for ${client.name}
+Region: ${client.region}
+
+Key Findings:
+${suggestions.substring(0, 500)}
+
+This analysis includes business-specific tax considerations for ${client.region}, available credits, and strategic tax planning recommendations. For detailed insights, please review the full report.`;
   }
-  
-  return summary;
 }

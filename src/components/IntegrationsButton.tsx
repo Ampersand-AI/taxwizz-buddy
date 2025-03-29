@@ -2,8 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function IntegrationsButton() {
+  const { t } = useTranslation();
+  
   return (
     <Button 
       variant="outline" 
@@ -11,7 +14,7 @@ export default function IntegrationsButton() {
       asChild
     >
       <Link to="/integrations">
-        Manage Integrations
+        {t('common.manageIntegrations')}
         <ArrowRight className="h-4 w-4" />
       </Link>
     </Button>

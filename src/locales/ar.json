@@ -1,0 +1,22 @@
+
+{
+  "common": {
+    "taxWizz": "TaxWizz",
+    "manageIntegrations": "إدارة التكاملات",
+    "next": "التالي",
+    "back": "رجوع",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "submit": "إرسال",
+    "loading": "جار التحميل..."
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "zh": "中文",
+    "hi": "हिन्दी",
+    "ar": "العربية"
+  }
+}

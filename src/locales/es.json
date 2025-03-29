@@ -1,0 +1,54 @@
+
+{
+  "common": {
+    "taxWizz": "TaxWizz",
+    "manageIntegrations": "Gestionar Integraciones",
+    "next": "Siguiente",
+    "back": "Atrás",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "submit": "Enviar",
+    "loading": "Cargando..."
+  },
+  "individual": {
+    "title": "Declaración de Impuestos Individual",
+    "subtitle": "Prepare su declaración de impuestos con asistencia de IA",
+    "taxInfo": "Su Información Fiscal",
+    "taxInfoDesc": "Complete sus datos para obtener un borrador personalizado de declaración de impuestos.",
+    "personal": "Información Personal",
+    "income": "Ingresos y Gastos",
+    "documents": "Documentos",
+    "fullName": "Nombre Completo",
+    "fullNamePlaceholder": "Ingrese su nombre completo",
+    "email": "Correo Electrónico",
+    "emailPlaceholder": "Ingrese su correo electrónico",
+    "phone": "Número de Teléfono (opcional)",
+    "phonePlaceholder": "Ingrese su número de teléfono",
+    "region": "Región Fiscal",
+    "regionPlaceholder": "Seleccione su región fiscal",
+    "incomeType": "Tipo de Ingreso Principal",
+    "incomeTypePlaceholder": "Seleccione tipo de ingreso",
+    "annualIncome": "Ingreso Anual Aproximado",
+    "annualIncomePlaceholder": "Ingrese monto en USD",
+    "uploadDocuments": "Subir Documentos de Respaldo",
+    "uploadDesc": "Arrastre y suelte sus W-2, 1099, recibos u otros documentos fiscales aquí, o haga clic para explorar",
+    "uploadFiles": "Subir Archivos",
+    "generateDraft": "Generar Borrador Fiscal"
+  },
+  "integrations": {
+    "title": "Integraciones con Software Contable",
+    "subtitle": "Conecte su software contable para importar automáticamente datos financieros y agilizar su preparación de impuestos.",
+    "connect": "Conectar",
+    "comingSoon": "Próximamente",
+    "note": "Nota: Estas integraciones están en desarrollo. Cuando estén disponibles, le permitirán importar sus datos financieros directamente desde su software contable para una planificación y preparación fiscal más precisa."
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "zh": "中文",
+    "hi": "हिन्दी",
+    "ar": "العربية"
+  }
+}

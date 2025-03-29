@@ -1,0 +1,54 @@
+
+{
+  "common": {
+    "taxWizz": "TaxWizz",
+    "manageIntegrations": "Manage Integrations",
+    "next": "Next",
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "submit": "Submit",
+    "loading": "Loading..."
+  },
+  "individual": {
+    "title": "Individual Tax Filing",
+    "subtitle": "Prepare your tax filing with AI assistance",
+    "taxInfo": "Your Tax Information",
+    "taxInfoDesc": "Fill in your details to get a personalized tax filing draft.",
+    "personal": "Personal Info",
+    "income": "Income & Expenses",
+    "documents": "Documents",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "email": "Email Address",
+    "emailPlaceholder": "Enter your email",
+    "phone": "Phone Number (optional)",
+    "phonePlaceholder": "Enter your phone number",
+    "region": "Tax Region",
+    "regionPlaceholder": "Select your tax region",
+    "incomeType": "Primary Income Type",
+    "incomeTypePlaceholder": "Select income type",
+    "annualIncome": "Approximate Annual Income",
+    "annualIncomePlaceholder": "Enter amount in USD",
+    "uploadDocuments": "Upload Supporting Documents",
+    "uploadDesc": "Drag and drop your W-2, 1099, receipts, or other tax documents here, or click to browse",
+    "uploadFiles": "Upload Files",
+    "generateDraft": "Generate Tax Draft"
+  },
+  "integrations": {
+    "title": "Accounting Software Integrations",
+    "subtitle": "Connect your accounting software to automatically import financial data and streamline your tax preparation.",
+    "connect": "Connect",
+    "comingSoon": "Coming Soon",
+    "note": "Note: These integrations are in development. When available, they will allow you to import your financial data directly from your accounting software for more accurate tax planning and preparation."
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "zh": "中文",
+    "hi": "हिन्दी",
+    "ar": "العربية"
+  }
+}

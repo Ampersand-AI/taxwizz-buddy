@@ -1,0 +1,22 @@
+
+{
+  "common": {
+    "taxWizz": "TaxWizz",
+    "manageIntegrations": "एकीकरण प्रबंधित करें",
+    "next": "अगला",
+    "back": "पीछे",
+    "cancel": "रद्द करें",
+    "save": "सहेजें",
+    "submit": "जमा करें",
+    "loading": "लोड हो रहा है..."
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "zh": "中文",
+    "hi": "हिन्दी",
+    "ar": "العربية"
+  }
+}

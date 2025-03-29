@@ -12,6 +12,7 @@ import Firm from "./pages/Firm";
 import FirmClientDetail from "./pages/FirmClientDetail";
 import Integrations from "./pages/Integrations";
 import NotFound from "./pages/NotFound";
+import LanguageSelector from "./components/LanguageSelector";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,9 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <div className="fixed top-4 right-4 z-50">
+              <LanguageSelector />
+            </div>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/individual" element={<Individual />} />

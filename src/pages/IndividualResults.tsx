@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Download, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,15 +11,17 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import TaxWizzLogo from "@/components/TaxWizzLogo";
+import { useTranslation } from "react-i18next";
 
 const IndividualResults = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleDownload = () => {
     toast({
-      title: "Tax Report Downloaded",
-      description: "Your tax report has been downloaded successfully.",
+      title: t('results.downloadSuccess'),
+      description: t('results.downloadDescription'),
     });
   };
 
@@ -40,10 +41,10 @@ const IndividualResults = () => {
             <TaxWizzLogo className="w-10 h-10 mr-3" />
             <div>
               <h1 className="text-2xl font-bold text-blue-900">
-                Tax Draft Results
+                {t('results.title', 'Tax Draft Results')}
               </h1>
               <p className="text-blue-600">
-                AI-generated tax filing recommendations
+                {t('results.subtitle', 'AI-generated tax filing recommendations')}
               </p>
             </div>
           </div>
@@ -53,45 +54,43 @@ const IndividualResults = () => {
           <CheckCircle className="h-5 w-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
           <div>
             <h3 className="font-medium text-green-800 mb-1">
-              Tax Draft Generated Successfully
+              {t('results.successTitle', 'Tax Draft Generated Successfully')}
             </h3>
             <p className="text-green-700 text-sm">
-              Our AI has analyzed your information and prepared a tax filing
-              draft with optimization suggestions based on current tax laws for
-              your region.
+              {t('results.successDescription', 'Our AI has analyzed your information and prepared a tax filing draft with optimization suggestions based on current tax laws for your region.')}
             </p>
           </div>
         </div>
 
         <Tabs defaultValue="summary" className="w-full mb-8">
           <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="summary">Summary</TabsTrigger>
-            <TabsTrigger value="detailed">Detailed Report</TabsTrigger>
+            <TabsTrigger value="summary">{t('results.summary', 'Summary')}</TabsTrigger>
+            <TabsTrigger value="detailed">{t('results.detailed', 'Detailed Report')}</TabsTrigger>
             <TabsTrigger value="optimizations">
-              Tax Optimizations
+              {t('results.optimizations', 'Tax Optimizations')}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="summary">
             <Card>
               <CardHeader>
-                <CardTitle>Tax Filing Summary</CardTitle>
+                <CardTitle>{t('results.summaryTitle', 'Tax Filing Summary')}</CardTitle>
                 <CardDescription>
-                  Overview of your current tax situation
+                  {t('results.summaryDescription', 'Overview of your current tax situation')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <p className="text-sm text-gray-500 mb-1">Total Income</p>
+                      <p className="text-sm text-gray-500 mb-1">{t('results.totalIncome', 'Total Income')}</p>
                       <p className="text-2xl font-bold text-blue-900">
                         $85,000.00
                       </p>
                     </div>
                     <div className="bg-white p-4 rounded-lg border border-gray-200">
                       <p className="text-sm text-gray-500 mb-1">
-                        Estimated Tax Due
+                        {t('results.estimatedTax', 'Estimated Tax Due')}
                       </p>
                       <p className="text-2xl font-bold text-blue-900">
                         $14,280.00
@@ -99,7 +98,7 @@ const IndividualResults = () => {
                     </div>
                     <div className="bg-white p-4 rounded-lg border border-gray-200">
                       <p className="text-sm text-gray-500 mb-1">
-                        Potential Deductions
+                        {t('results.potentialDeductions', 'Potential Deductions')}
                       </p>
                       <p className="text-2xl font-bold text-green-600">
                         $12,500.00
@@ -107,7 +106,7 @@ const IndividualResults = () => {
                     </div>
                     <div className="bg-white p-4 rounded-lg border border-gray-200">
                       <p className="text-sm text-gray-500 mb-1">
-                        Potential Tax Savings
+                        {t('results.potentialSavings', 'Potential Tax Savings')}
                       </p>
                       <p className="text-2xl font-bold text-green-600">
                         $2,750.00
@@ -117,12 +116,10 @@ const IndividualResults = () => {
 
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                     <h3 className="font-medium text-blue-800 mb-2">
-                      Summary Analysis
+                      {t('results.summaryAnalysis', 'Summary Analysis')}
                     </h3>
                     <p className="text-blue-700 mb-4">
-                      Based on the information provided, you're in the 22% tax
-                      bracket for federal taxes. We've identified several
-                      potential deductions that could reduce your tax liability.
+                      {t('results.analysisDescription', "Based on the information provided, you're in the 22% tax bracket for federal taxes. We've identified several potential deductions that could reduce your tax liability.")}
                     </p>
                     <div className="flex justify-end">
                       <Button
@@ -130,7 +127,7 @@ const IndividualResults = () => {
                         className="flex items-center"
                       >
                         <Download className="mr-2 h-4 w-4" />
-                        Download Summary Report
+                        {t('results.downloadSummary', 'Download Summary Report')}
                       </Button>
                     </div>
                   </div>

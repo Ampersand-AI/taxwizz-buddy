@@ -33,7 +33,29 @@
     "uploadDocuments": "Subir Documentos de Respaldo",
     "uploadDesc": "Arrastre y suelte sus W-2, 1099, recibos u otros documentos fiscales aquí, o haga clic para explorar",
     "uploadFiles": "Subir Archivos",
-    "generateDraft": "Generar Borrador Fiscal"
+    "generateDraft": "Generar Borrador Fiscal",
+    "infoNote": "Para un borrador fiscal más preciso, podrá cargar documentos de respaldo en el siguiente paso.",
+    "optionalNote": "Aunque los documentos son opcionales, ayudan a nuestra IA a proporcionar sugerencias de optimización fiscal más precisas."
+  },
+  "results": {
+    "title": "Resultados del Borrador Fiscal",
+    "subtitle": "Recomendaciones de declaración de impuestos generadas por IA",
+    "successTitle": "Borrador Fiscal Generado con Éxito",
+    "successDescription": "Nuestra IA ha analizado su información y preparado un borrador de declaración de impuestos con sugerencias de optimización basadas en las leyes fiscales actuales para su región.",
+    "summary": "Resumen",
+    "detailed": "Informe Detallado",
+    "optimizations": "Optimizaciones Fiscales",
+    "summaryTitle": "Resumen de Declaración Fiscal",
+    "summaryDescription": "Visión general de su situación fiscal actual",
+    "totalIncome": "Ingreso Total",
+    "estimatedTax": "Impuesto Estimado a Pagar",
+    "potentialDeductions": "Deducciones Potenciales",
+    "potentialSavings": "Ahorros Fiscales Potenciales",
+    "summaryAnalysis": "Análisis Resumido",
+    "analysisDescription": "Según la información proporcionada, usted está en el tramo impositivo del 22% para impuestos federales. Hemos identificado varias deducciones potenciales que podrían reducir su obligación tributaria.",
+    "downloadSummary": "Descargar Informe Resumido",
+    "downloadSuccess": "Informe Fiscal Descargado",
+    "downloadDescription": "Su informe fiscal ha sido descargado con éxito."
   },
   "integrations": {
     "title": "Integraciones con Software Contable",
